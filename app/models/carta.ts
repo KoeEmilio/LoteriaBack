@@ -16,10 +16,10 @@ export default class Carta extends BaseModel {
   declare usuarioId: number
 
   @column()
-  declare mazoCartaIds: string[] // Array de 16 IDs de MazoCarta para la cartilla
+  declare mazoCartaIds: string[] 
 
   @column()
-  declare estaRevelada: boolean // Para el anfitrión que vea la cartilla
+  declare estaRevelada: boolean 
 
   @column.dateTime({ autoCreate: true })
   declare creadoEn: DateTime

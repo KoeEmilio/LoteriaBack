@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, beforeSave, belongsTo, hasOne } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasOne, beforeSave } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
-import Hash from '@adonisjs/core/services/hash'
+import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
+import hash from '@adonisjs/core/services/hash'
 import Juego from './juego.js'
 import Carta from './carta.js'
 
@@ -40,9 +41,22 @@ export default class User extends BaseModel {
   declare carta: HasOne<typeof Carta>
 
   @beforeSave()
-  public static async hashPassword(user: User) {
+  static async hashPassword(user: User) {
     if (user.$dirty.password) {
-      user.password = await Hash.make(user.password)
+      user.password = await hash.make(user.password)
     }
   }
+
+  static async verifyCredentials(email: string, password: string) {
+    const user = await User.findByOrFail('email', email)
+    const isPasswordValid = await hash.verify(user.password, password)
+    
+    if (!isPasswordValid) {
+      throw new Error('Credenciales inválidas')
+    }
+    
+    return user
+  }
+
+  static accessTokens = DbAccessTokensProvider.forModel(User)
 }
