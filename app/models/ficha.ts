@@ -7,18 +7,20 @@ export default class Ficha extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'carta_id' })
   declare cartaId: number
 
   @column()
-  declare posicion: number // Índice de mazoCartaIds (0-15)
+  declare posicion: number
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'creado_en' })
   declare creadoEn: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'actualizado_en' })
   declare actualizadoEn: DateTime
 
-  @belongsTo(() => Carta)
+  @belongsTo(() => Carta, {
+    foreignKey: 'cartaId'
+  })
   declare carta: BelongsTo<typeof Carta>
 }

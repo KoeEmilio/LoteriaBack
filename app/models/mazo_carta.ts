@@ -6,14 +6,17 @@ export default class MazoCarta extends BaseModel {
   declare id: number
 
   @column()
-  declare numero: number // 1-55
+  declare numero: number
 
   @column()
-  declare nombre: string // Ej. "El Diablito", "La Calavera"
+  declare nombre: string
 
   @column()
-  declare imagen: string // Ruta o URL de la imagen
+  declare imagen: string
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'creado_en' })
   declare creadoEn: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'actualizado_en' })
+  declare actualizadoEn: DateTime
 }

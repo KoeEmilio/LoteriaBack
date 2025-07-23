@@ -2,7 +2,10 @@ import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class AddAllForeignKeys extends BaseSchema {
   public async up() {
- 
+    // Foreign keys para auth_access_tokens
+    this.schema.alterTable('auth_access_tokens', (table) => {
+      table.foreign('tokenable_id').references('id').inTable('users').onDelete('CASCADE')
+    })
 
     // Foreign keys para users
     this.schema.alterTable('users', (table) => {
@@ -28,6 +31,7 @@ export default class AddAllForeignKeys extends BaseSchema {
   }
 
   public async down() {
+    // Eliminar foreign keys en orden inverso
     this.schema.alterTable('fichas', (table) => {
       table.dropForeign(['carta_id'])
     })

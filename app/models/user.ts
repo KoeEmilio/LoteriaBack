@@ -10,13 +10,13 @@ export default class User extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
-  declare juegoId: number
+  @column({ columnName: 'juego_id' })
+  declare juegoId: number | null
 
-  @column()
+  @column({ columnName: 'es_anfitrion' })
   declare esAnfitrion: boolean
 
-  @column()
+  @column({ columnName: 'es_tramposo' })
   declare esTramposo: boolean
 
   @column()
@@ -25,19 +25,23 @@ export default class User extends BaseModel {
   @column()
   declare password: string
 
-  @column()
+  @column({ columnName: 'remember_me_token' })
   declare rememberMeToken: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'creado_en' })
   declare creadoEn: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'actualizado_en' })
   declare actualizadoEn: DateTime
 
-  @belongsTo(() => Juego)
+  @belongsTo(() => Juego, {
+    foreignKey: 'juegoId'
+  })
   declare juego: BelongsTo<typeof Juego>
 
-  @hasOne(() => Carta)
+  @hasOne(() => Carta, {
+    foreignKey: 'usuarioId'
+  })
   declare carta: HasOne<typeof Carta>
 
   @beforeSave()

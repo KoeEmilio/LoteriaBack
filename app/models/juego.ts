@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany} from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 
@@ -10,30 +10,27 @@ export default class Juego extends BaseModel {
   @column()
   declare estado: 'esperando' | 'iniciado' | 'finalizado'
 
-  @column()
+  @column({ columnName: 'anfitrion_id' })
   declare anfitrionId: number
 
-  @column()
+  @column({ columnName: 'ganador_id' })
   declare ganadorId: number | null
 
-  @column()
-  declare cartasAnunciadas: string[] // Array de IDs de MazoCarta anunciadas
+  @column({
+    columnName: 'cartas_anunciadas',
+    prepare: (value: number[]) => JSON.stringify(value),
+    consume: (value: string) => JSON.parse(value || '[]')
+  })
+  declare cartasAnunciadas: number[]
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'creado_en' })
   declare creadoEn: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'actualizado_en' })
   declare actualizadoEn: DateTime
 
-  @hasMany(() => User)
+  @hasMany(() => User, {
+    foreignKey: 'juegoId'
+  })
   declare jugadores: HasMany<typeof User>
-
-  static boot() {
-    super.boot()
-    this.before('create', async (juego) => {
-      if (!juego.cartasAnunciadas) {
-        juego.cartasAnunciadas = []
-      }
-    })
-  }
 }

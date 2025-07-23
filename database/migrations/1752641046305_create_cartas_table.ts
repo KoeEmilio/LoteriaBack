@@ -1,20 +1,21 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
-export default class Cartas extends BaseSchema {
+export default class extends BaseSchema {
   protected tableName = 'cartas'
 
-  public async up() {
+  async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('juego_id').notNullable().unsigned()
-      table.integer('usuario_id').notNullable().unsigned()
-      table.json('mazo_carta_ids').notNullable() // Array de 16 IDs
+      table.integer('juego_id').unsigned().notNullable()
+      table.integer('usuario_id').unsigned().notNullable()
+      table.json('mazo_carta_ids').notNullable()
       table.boolean('esta_revelada').defaultTo(false)
-      table.timestamps(true, true, true)
+      table.timestamp('creado_en', { useTz: true }).defaultTo(this.now())
+      table.timestamp('actualizado_en', { useTz: true }).defaultTo(this.now())
     })
   }
 
-  public async down() {
+  async down() {
     this.schema.dropTable(this.tableName)
   }
 }

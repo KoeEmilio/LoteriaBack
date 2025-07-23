@@ -9,32 +9,40 @@ export default class Carta extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'juego_id' })
   declare juegoId: number
 
-  @column()
+  @column({ columnName: 'usuario_id' })
   declare usuarioId: number
 
-  @column()
-  declare mazoCartaIds: string[] 
+  @column({
+    columnName: 'mazo_carta_ids',
+    prepare: (value: number[]) => JSON.stringify(value),
+    consume: (value: string) => JSON.parse(value || '[]')
+  })
+  declare mazoCartaIds: number[]
 
-  @column()
-  declare estaRevelada: boolean 
+  @column({ columnName: 'esta_revelada' })
+  declare estaRevelada: boolean
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'creado_en' })
   declare creadoEn: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'actualizado_en' })
   declare actualizadoEn: DateTime
 
-  @belongsTo(() => Juego)
+  @belongsTo(() => Juego, {
+    foreignKey: 'juegoId'
+  })
   declare juego: BelongsTo<typeof Juego>
 
   @belongsTo(() => User, {
-    foreignKey: 'usuarioId', 
+    foreignKey: 'usuarioId'
   })
   declare usuario: BelongsTo<typeof User>
 
-  @hasMany(() => Ficha)
+  @hasMany(() => Ficha, {
+    foreignKey: 'cartaId'
+  })
   declare fichas: HasMany<typeof Ficha>
 }

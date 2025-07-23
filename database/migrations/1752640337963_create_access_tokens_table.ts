@@ -15,8 +15,10 @@ export default class extends BaseSchema {
       table.string('name').nullable()
       table.string('hash').notNullable()
       table.text('abilities').notNullable()
-      table.timestamps(true, true, true) 
-
+      table.timestamp('creado_en', { useTz: true }).defaultTo(this.now())
+      table.timestamp('actualizado_en', { useTz: true }).defaultTo(this.now())
+      table.timestamp('expires_at', { useTz: true }).nullable()
+      table.timestamp('last_used_at', { useTz: true }).nullable()
     })
   }
 
