@@ -35,12 +35,12 @@ export default class User extends BaseModel {
   declare actualizadoEn: DateTime
 
   @belongsTo(() => Juego, {
-    foreignKey: 'juegoId'
+    foreignKey: 'juegoId',
   })
   declare juego: BelongsTo<typeof Juego>
 
   @hasOne(() => Carta, {
-    foreignKey: 'usuarioId'
+    foreignKey: 'usuarioId',
   })
   declare carta: HasOne<typeof Carta>
 
@@ -54,11 +54,11 @@ export default class User extends BaseModel {
   static async verifyCredentials(email: string, password: string) {
     const user = await User.findByOrFail('email', email)
     const isPasswordValid = await hash.verify(user.password, password)
-    
+
     if (!isPasswordValid) {
       throw new Error('Credenciales inválidas')
     }
-    
+
     return user
   }
 

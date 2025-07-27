@@ -19,7 +19,7 @@ export default class Juego extends BaseModel {
   @column({
     columnName: 'cartas_anunciadas',
     prepare: (value: number[]) => JSON.stringify(value),
-    consume: (value: string) => JSON.parse(value || '[]')
+    consume: (value: string) => JSON.parse(value || '[]'),
   })
   declare cartasAnunciadas: number[]
 
@@ -30,7 +30,7 @@ export default class Juego extends BaseModel {
   declare actualizadoEn: DateTime
 
   @hasMany(() => User, {
-    foreignKey: 'juegoId'
+    foreignKey: 'juegoId',
   })
   declare jugadores: HasMany<typeof User>
 }

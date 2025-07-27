@@ -6,17 +6,14 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table
-        .integer('tokenable_id')
-        .notNullable()
-        .unsigned()
+      table.integer('tokenable_id').notNullable().unsigned()
 
       table.string('type').notNullable()
       table.string('name').nullable()
       table.string('hash').notNullable()
       table.text('abilities').notNullable()
-      table.timestamp('creado_en', { useTz: true }).defaultTo(this.now())
-      table.timestamp('actualizado_en', { useTz: true }).defaultTo(this.now())
+      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
+      table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())
       table.timestamp('expires_at', { useTz: true }).nullable()
       table.timestamp('last_used_at', { useTz: true }).nullable()
     })

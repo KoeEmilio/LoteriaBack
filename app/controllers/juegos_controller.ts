@@ -4,7 +4,7 @@ import User from '#models/user'
 import Carta from '#models/carta'
 import Ficha from '#models/ficha'
 import MazoCarta from '#models/mazo_carta'
-import { generarCartillaAleatoria, barajarCartas } from '#utils/loteria_helpers'
+import { generarCartillaAleatoria } from '#utils/loteria_helpers'
 
 export default class JuegoController {
   /**
@@ -17,7 +17,7 @@ export default class JuegoController {
       // Verificar que el usuario no esté ya en un juego
       if (user.juegoId) {
         return response.status(400).json({
-          message: 'Ya estás en un juego activo'
+          message: 'Ya estás en un juego activo',
         })
       }
 
@@ -25,7 +25,7 @@ export default class JuegoController {
       const juego = await Juego.create({
         estado: 'esperando',
         anfitrionId: user.id,
-        cartasAnunciadas: []
+        cartasAnunciadas: [],
       })
 
       // Actualizar al usuario como anfitrión
@@ -39,13 +39,12 @@ export default class JuegoController {
           id: juego.id,
           estado: juego.estado,
           esAnfitrion: true,
-          codigoJuego: juego.id
-        }
+        },
       })
     } catch (error) {
       return response.status(500).json({
         message: 'Error al crear la partida',
-        error: error.message
+        error: error.message,
       })
     }
   }
@@ -61,7 +60,7 @@ export default class JuegoController {
       // Verificar que el usuario no esté ya en un juego
       if (user.juegoId) {
         return response.status(400).json({
-          message: 'Ya estás en un juego activo'
+          message: 'Ya estás en un juego activo',
         })
       }
 
@@ -71,7 +70,7 @@ export default class JuegoController {
       // Verificar que el juego esté en estado de espera
       if (juego.estado !== 'esperando') {
         return response.status(400).json({
-          message: 'El juego ya ha iniciado o finalizado'
+          message: 'El juego ya ha iniciado o finalizado',
         })
       }
 
@@ -81,7 +80,7 @@ export default class JuegoController {
 
       if (totalJugadores >= 16) {
         return response.status(400).json({
-          message: 'El juego está lleno (máximo 16 jugadores)'
+          message: 'El juego está lleno (máximo 16 jugadores)',
         })
       }
 
@@ -96,13 +95,13 @@ export default class JuegoController {
           id: juego.id,
           estado: juego.estado,
           esAnfitrion: false,
-          totalJugadores: totalJugadores + 1
-        }
+          totalJugadores: totalJugadores + 1,
+        },
       })
     } catch (error) {
       return response.status(500).json({
         message: 'Error al unirse a la partida',
-        error: error.message
+        error: error.message,
       })
     }
   }
@@ -116,7 +115,7 @@ export default class JuegoController {
 
       if (!user.esAnfitrion) {
         return response.status(403).json({
-          message: 'Solo el anfitrión puede iniciar la partida'
+          message: 'Solo el anfitrión puede iniciar la partida',
         })
       }
 
@@ -128,7 +127,7 @@ export default class JuegoController {
 
       if (totalJugadores < 4) {
         return response.status(400).json({
-          message: 'Se necesitan mínimo 4 jugadores para iniciar'
+          message: 'Se necesitan mínimo 4 jugadores para iniciar',
         })
       }
 
@@ -146,7 +145,7 @@ export default class JuegoController {
             juegoId: juego.id,
             usuarioId: jugador.id,
             mazoCartaIds: cartillaIds,
-            estaRevelada: false
+            estaRevelada: false,
           })
         }
       }
@@ -160,13 +159,13 @@ export default class JuegoController {
         juego: {
           id: juego.id,
           estado: juego.estado,
-          totalJugadores
-        }
+          totalJugadores,
+        },
       })
     } catch (error) {
       return response.status(500).json({
         message: 'Error al iniciar la partida',
-        error: error.message
+        error: error.message,
       })
     }
   }
@@ -180,7 +179,7 @@ export default class JuegoController {
 
       if (!user.esAnfitrion) {
         return response.status(403).json({
-          message: 'Solo el anfitrión puede revelar cartas'
+          message: 'Solo el anfitrión puede revelar cartas',
         })
       }
 
@@ -188,7 +187,7 @@ export default class JuegoController {
 
       if (juego.estado !== 'iniciado') {
         return response.status(400).json({
-          message: 'El juego no está en estado de juego'
+          message: 'El juego no está en estado de juego',
         })
       }
 
@@ -196,18 +195,19 @@ export default class JuegoController {
 
       // Obtener cartas no anunciadas
       const todasLasCartas = await MazoCarta.query().select('id')
-      const cartasNoAnunciadas = todasLasCartas.filter(carta => 
-        !cartasAnunciadas.includes(carta.id)
+      const cartasNoAnunciadas = todasLasCartas.filter(
+        (carta) => !cartasAnunciadas.includes(carta.id)
       )
 
       if (cartasNoAnunciadas.length === 0) {
         return response.status(400).json({
-          message: 'Ya se han revelado todas las cartas'
+          message: 'Ya se han revelado todas las cartas',
         })
       }
 
       // Seleccionar una carta aleatoria de las no anunciadas
-      const cartaRevelada = cartasNoAnunciadas[Math.floor(Math.random() * cartasNoAnunciadas.length)]
+      const cartaRevelada =
+        cartasNoAnunciadas[Math.floor(Math.random() * cartasNoAnunciadas.length)]
       const cartaInfo = await MazoCarta.findOrFail(cartaRevelada.id)
 
       // Agregar a cartas anunciadas
@@ -223,15 +223,15 @@ export default class JuegoController {
           id: cartaInfo.id,
           numero: cartaInfo.numero,
           nombre: cartaInfo.nombre,
-          imagen: cartaInfo.imagen
+          imagen: cartaInfo.imagen,
         },
         totalCartasReveladas: cartasAnunciadas.length,
-        totalCartas: todasLasCartas.length
+        totalCartas: todasLasCartas.length,
       })
     } catch (error) {
       return response.status(500).json({
         message: 'Error al revelar carta',
-        error: error.message
+        error: error.message,
       })
     }
   }
@@ -246,15 +246,15 @@ export default class JuegoController {
 
       if (posicion < 0 || posicion > 15) {
         return response.status(400).json({
-          message: 'Posición inválida'
+          message: 'Posición inválida',
         })
       }
 
       const juego = await Juego.findOrFail(user.juegoId!)
-      
+
       if (juego.estado !== 'iniciado') {
         return response.status(400).json({
-          message: 'El juego no está activo'
+          message: 'El juego no está activo',
         })
       }
 
@@ -269,15 +269,15 @@ export default class JuegoController {
 
       // Verificar si la carta en esa posición ha sido anunciada
       const cartaEnPosicion = cartasCartilla[posicion]
-      
+
       if (!cartasAnunciadas.includes(cartaEnPosicion)) {
         // Marcar como tramposo
         user.esTramposo = true
         await user.save()
-        
+
         return response.status(400).json({
           message: 'Carta no válida - marcado como tramposo',
-          esTramposo: true
+          esTramposo: true,
         })
       }
 
@@ -289,14 +289,14 @@ export default class JuegoController {
 
       if (fichaExistente) {
         return response.status(400).json({
-          message: 'La ficha ya está marcada'
+          message: 'La ficha ya está marcada',
         })
       }
 
       // Crear la ficha
       await Ficha.create({
         cartaId: carta.id,
-        posicion: posicion
+        posicion: posicion,
       })
 
       // Contar fichas totales del usuario
@@ -313,19 +313,19 @@ export default class JuegoController {
         return response.json({
           message: '¡Felicidades! Has ganado',
           ganador: true,
-          totalFichas: fichasCount
+          totalFichas: fichasCount,
         })
       }
 
       return response.json({
         message: 'Ficha marcada correctamente',
         totalFichas: fichasCount,
-        cartillaCompleta: fichasCount === 16
+        cartillaCompleta: fichasCount === 16,
       })
     } catch (error) {
       return response.status(500).json({
         message: 'Error al marcar ficha',
-        error: error.message
+        error: error.message,
       })
     }
   }
@@ -339,14 +339,11 @@ export default class JuegoController {
 
       if (!user.juegoId) {
         return response.status(400).json({
-          message: 'No estás en ningún juego'
+          message: 'No estás en ningún juego',
         })
       }
 
-      const juego = await Juego.query()
-        .where('id', user.juegoId)
-        .preload('jugadores')
-        .firstOrFail()
+      const juego = await Juego.query().where('id', user.juegoId).preload('jugadores').firstOrFail()
 
       // Obtener cartilla del usuario
       const carta = await Carta.query()
@@ -354,21 +351,21 @@ export default class JuegoController {
         .where('juegoId', juego.id)
         .preload('fichas')
         .first()
-      
+
       let cartillaData = null
       if (carta) {
         const cartasIds = carta.mazoCartaIds
         const cartasInfo = await MazoCarta.query().whereIn('id', cartasIds)
-        
+
         // Crear array de fichas marcadas (boolean array)
         const fichasMarcadas = Array(16).fill(false)
-        carta.fichas.forEach(ficha => {
+        carta.fichas.forEach((ficha) => {
           fichasMarcadas[ficha.posicion] = true
         })
-        
+
         cartillaData = {
           cartas: cartasInfo,
-          fichas: fichasMarcadas
+          fichas: fichasMarcadas,
         }
       }
 
@@ -388,18 +385,18 @@ export default class JuegoController {
           totalCartasAnunciadas: cartasAnunciadas.length,
           ganadorId: juego.ganadorId,
           totalJugadores: juego.jugadores.length,
-          cartasAnunciadas: cartasAnunciadas
+          cartasAnunciadas: cartasAnunciadas,
         },
         usuario: {
           esAnfitrion: user.esAnfitrion,
-          esTramposo: user.esTramposo
+          esTramposo: user.esTramposo,
         },
-        cartilla: cartillaData
+        cartilla: cartillaData,
       })
     } catch (error) {
       return response.status(500).json({
         message: 'Error al obtener estado del juego',
-        error: error.message
+        error: error.message,
       })
     }
   }
@@ -413,7 +410,7 @@ export default class JuegoController {
 
       if (!user.esAnfitrion) {
         return response.status(403).json({
-          message: 'Solo el anfitrión puede ver las cartillas'
+          message: 'Solo el anfitrión puede ver las cartillas',
         })
       }
 
@@ -431,18 +428,18 @@ export default class JuegoController {
               jugador: {
                 id: jugador.id,
                 email: jugador.email,
-                esTramposo: jugador.esTramposo
+                esTramposo: jugador.esTramposo,
               },
-              cartilla: null
+              cartilla: null,
             }
           }
 
           const cartasIds = jugador.carta.mazoCartaIds
           const cartasInfo = await MazoCarta.query().whereIn('id', cartasIds)
-          
+
           // Crear array de fichas marcadas
           const fichasMarcadas = Array(16).fill(false)
-          jugador.carta.fichas.forEach(ficha => {
+          jugador.carta.fichas.forEach((ficha) => {
             fichasMarcadas[ficha.posicion] = true
           })
 
@@ -450,23 +447,23 @@ export default class JuegoController {
             jugador: {
               id: jugador.id,
               email: jugador.email,
-              esTramposo: jugador.esTramposo
+              esTramposo: jugador.esTramposo,
             },
             cartilla: {
               cartas: cartasInfo,
-              fichas: fichasMarcadas
-            }
+              fichas: fichasMarcadas,
+            },
           }
         })
       )
 
       return response.json({
-        cartillas: cartillasJugadores
+        cartillas: cartillasJugadores,
       })
     } catch (error) {
       return response.status(500).json({
         message: 'Error al obtener cartillas',
-        error: error.message
+        error: error.message,
       })
     }
   }
@@ -480,12 +477,12 @@ export default class JuegoController {
 
       if (!user.juegoId) {
         return response.status(400).json({
-          message: 'No estás en ningún juego'
+          message: 'No estás en ningún juego',
         })
       }
 
       const juegoId = user.juegoId
-      
+
       // Eliminar cartilla y fichas si existen
       const carta = await Carta.query()
         .where('usuarioId', user.id)
@@ -505,7 +502,7 @@ export default class JuegoController {
 
       // Si era el anfitrión y hay otros jugadores, asignar nuevo anfitrión
       const jugadoresRestantes = await User.query().where('juegoId', juegoId)
-      
+
       if (jugadoresRestantes.length > 0) {
         const nuevoAnfitrion = jugadoresRestantes[0]
         nuevoAnfitrion.esAnfitrion = true
@@ -516,12 +513,12 @@ export default class JuegoController {
       }
 
       return response.json({
-        message: 'Has salido del juego exitosamente'
+        message: 'Has salido del juego exitosamente',
       })
     } catch (error) {
       return response.status(500).json({
         message: 'Error al salir del juego',
-        error: error.message
+        error: error.message,
       })
     }
   }

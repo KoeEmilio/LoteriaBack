@@ -18,7 +18,7 @@ export default class Carta extends BaseModel {
   @column({
     columnName: 'mazo_carta_ids',
     prepare: (value: number[]) => JSON.stringify(value),
-    consume: (value: string) => JSON.parse(value || '[]')
+    consume: (value: string) => JSON.parse(value || '[]'),
   })
   declare mazoCartaIds: number[]
 
@@ -32,17 +32,17 @@ export default class Carta extends BaseModel {
   declare actualizadoEn: DateTime
 
   @belongsTo(() => Juego, {
-    foreignKey: 'juegoId'
+    foreignKey: 'juegoId',
   })
   declare juego: BelongsTo<typeof Juego>
 
   @belongsTo(() => User, {
-    foreignKey: 'usuarioId'
+    foreignKey: 'usuarioId',
   })
   declare usuario: BelongsTo<typeof User>
 
   @hasMany(() => Ficha, {
-    foreignKey: 'cartaId'
+    foreignKey: 'cartaId',
   })
   declare fichas: HasMany<typeof Ficha>
 }

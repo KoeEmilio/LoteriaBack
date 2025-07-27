@@ -20,7 +20,7 @@ export default class Ficha extends BaseModel {
   declare actualizadoEn: DateTime
 
   @belongsTo(() => Carta, {
-    foreignKey: 'cartaId'
+    foreignKey: 'cartaId',
   })
   declare carta: BelongsTo<typeof Carta>
 }
