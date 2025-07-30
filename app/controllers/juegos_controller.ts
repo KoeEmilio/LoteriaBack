@@ -5,102 +5,143 @@ import Carta from '#models/carta'
 import Ficha from '#models/ficha'
 import MazoCarta from '#models/mazo_carta'
 import { generarCartillaAleatoria } from '#utils/loteria_helpers'
+import { crearPartidaValidator } from '#validators/juego'
+import logger from '@adonisjs/core/services/logger'
 
 export default class JuegoController {
   /**
    * Crear una nueva partida
    */
-  async crearPartida({ auth, response }: HttpContext) {
+  async crearPartida({ auth, request, response }: HttpContext) {
     try {
       const user = auth.getUserOrFail()
 
-      // Verificar que el usuario no esté ya en un juego
       if (user.juegoId) {
+        logger.info('El usuario ya esta en un juego: %o', user)
         return response.status(400).json({
           message: 'Ya estás en un juego activo',
         })
       }
 
-      // Crear el juego
+      const { maxJugadores } = await request.validateUsing(crearPartidaValidator)
+      logger.info('Validando el maxJugadores: %d', maxJugadores)
+
       const juego = await Juego.create({
         estado: 'esperando',
         anfitrionId: user.id,
+        maxJugadores,
         cartasAnunciadas: [],
       })
+      logger.info('Juego creado: %o', juego)
 
-      // Actualizar al usuario como anfitrión
       user.juegoId = juego.id
       user.esAnfitrion = true
       await user.save()
+      logger.info('Usuario actualizado a ser host: %o', user)
 
       return response.status(201).json({
         message: 'Partida creada exitosamente',
         juego: {
           id: juego.id,
           estado: juego.estado,
+          maxJugadores: juego.maxJugadores,
           esAnfitrion: true,
         },
       })
     } catch (error) {
+      logger.error('Error al crear la partida: %o', error)
       return response.status(500).json({
         message: 'Error al crear la partida',
-        error: error.message,
+        error: error.messages || error.message,
       })
     }
   }
 
-  /**
-   * Unirse a una partida
-   */
   async unirsePartida({ auth, request, response }: HttpContext) {
     try {
       const user = auth.getUserOrFail()
-      const { codigoJuego } = request.only(['codigoJuego'])
-
-      // Verificar que el usuario no esté ya en un juego
       if (user.juegoId) {
+        logger.info('El usuario ya está en un juego: %o', user)
         return response.status(400).json({
           message: 'Ya estás en un juego activo',
         })
       }
 
-      // Buscar el juego
-      const juego = await Juego.findOrFail(codigoJuego)
-
-      // Verificar que el juego esté en estado de espera
-      if (juego.estado !== 'esperando') {
+      const juegoId = request.input('juegoId')
+      if (!juegoId) {
         return response.status(400).json({
-          message: 'El juego ya ha iniciado o finalizado',
+          message: 'ID de juego requerido',
         })
       }
 
-      // Contar jugadores actuales
-      const jugadoresActuales = await User.query().where('juegoId', juego.id).count('* as total')
-      const totalJugadores = Number(jugadoresActuales[0].$extras.total)
+      const juego = await Juego.query()
+        .where('id', juegoId)
+        .where('estado', 'esperando')
+        .preload('jugadores')
+        .firstOrFail()
 
-      if (totalJugadores >= 16) {
+      if (juego.jugadores.length >= juego.maxJugadores) {
         return response.status(400).json({
-          message: 'El juego está lleno (máximo 16 jugadores)',
+          message: 'El juego está lleno',
         })
       }
 
-      // Unir al usuario al juego
       user.juegoId = juego.id
       user.esAnfitrion = false
       await user.save()
+      logger.info('Usuario unido al juego: %o', user)
+
+      const totalJugadores = juego.jugadores.length + 1
 
       return response.json({
         message: 'Te has unido a la partida exitosamente',
         juego: {
           id: juego.id,
           estado: juego.estado,
+          maxJugadores: juego.maxJugadores,
           esAnfitrion: false,
-          totalJugadores: totalJugadores + 1,
+          totalJugadores,
         },
       })
     } catch (error) {
+      logger.error('Error al unirse a la partida: %o', error)
       return response.status(500).json({
         message: 'Error al unirse a la partida',
+        error: error.message,
+      })
+    }
+  }
+
+  async listarPartidas({ request, response }: HttpContext) {
+    try {
+      const page = request.input('page', 1)
+      const limit = 10
+
+      const juegos = await Juego.query()
+        .where('estado', 'esperando')
+        .preload('jugadores')
+        .whereRaw(
+          '(SELECT COUNT(*) FROM users WHERE users.juego_id = juegos.id) < juegos.max_jugadores'
+        )
+        .paginate(page, limit)
+
+      const juegosFormateados = juegos.toJSON().data.map((juego) => ({
+        id: juego.id,
+        anfitrionEmail: juego.anfitrion?.email || 'Desconocido',
+        maxJugadores: juego.maxJugadores,
+        totalJugadores: juego.jugadores.length,
+        creadoEn: juego.creadoEn,
+      }))
+
+      return response.json({
+        message: 'Lista de partidas disponibles',
+        partidas: juegosFormateados,
+        meta: juegos.toJSON().meta,
+      })
+    } catch (error) {
+      logger.error('Error al listar partidas: %o', error)
+      return response.status(500).json({
+        message: 'Error al listar partidas',
         error: error.message,
       })
     }

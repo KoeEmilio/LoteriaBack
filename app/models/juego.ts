@@ -16,6 +16,9 @@ export default class Juego extends BaseModel {
   @column({ columnName: 'ganador_id' })
   declare ganadorId: number | null
 
+  @column({ columnName: 'max_jugadores' })
+  declare maxJugadores: number
+
   @column({
     columnName: 'cartas_anunciadas',
     prepare: (value: number[]) => JSON.stringify(value),

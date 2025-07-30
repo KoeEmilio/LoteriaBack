@@ -22,6 +22,7 @@ router
   .group(() => {
     router.post('/crear', '#controllers/juegos_controller.crearPartida')
     router.post('/unirse', '#controllers/juegos_controller.unirsePartida')
+    router.get('/listar', '#controllers/juegos_controller.listarPartidas')
     router.post('/iniciar', '#controllers/juegos_controller.iniciarPartida')
     router.post('/revelar-carta', '#controllers/juegos_controller.revelarCarta')
     router.post('/marcar-ficha', '#controllers/juegos_controller.marcarFicha')

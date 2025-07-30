@@ -14,7 +14,6 @@ export async function generarCartillaAleatoria(): Promise<number[]> {
     cartilla.push(cartasDisponibles[randomIndex])
     cartasDisponibles.splice(randomIndex, 1)
   }
-
   return cartilla
 }
 
