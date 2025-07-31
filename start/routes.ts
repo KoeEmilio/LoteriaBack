@@ -32,3 +32,5 @@ router
   })
   .prefix('/juego')
   .use(middleware.auth())
+
+  router.get('/cartas/*', '#controllers/static_controller.serve')
