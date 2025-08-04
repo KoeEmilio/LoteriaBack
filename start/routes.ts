@@ -7,7 +7,7 @@ router.get('/', async () => {
   }
 })
 
-// Rutas de autenticación
+
 router
   .group(() => {
     router.post('/register', '#controllers/auth_controller.register')
@@ -17,7 +17,7 @@ router
   })
   .prefix('/auth')
 
-// Rutas del juego
+
 router
   .group(() => {
     router.post('/crear', '#controllers/juegos_controller.crearPartida')
@@ -29,8 +29,14 @@ router
     router.get('/estado', '#controllers/juegos_controller.obtenerEstadoJuego')
     router.get('/cartillas', '#controllers/juegos_controller.verCartillasJugadores')
     router.post('/salir', '#controllers/juegos_controller.salirJuego')
+    router.post('/revancha', '#controllers/juegos_controller.revancha')
+    router.post('/confirmar-revancha', '#controllers/juegos_controller.confirmarRevancha')
+      .use(middleware.auth())
+    router.post('/crear-revancha', '#controllers/juegos_controller.crearRevancha')
+    router.post('/terminar', '#controllers/juegos_controller.terminarPartida')
   })
   .prefix('/juego')
   .use(middleware.auth())
 
-  router.get('/cartas/*', '#controllers/static_controller.serve')
+  
+router.get('/cartas/*', '#controllers/static_controller.serve')

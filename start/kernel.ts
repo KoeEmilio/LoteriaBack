@@ -8,6 +8,7 @@
 |
 */
 
+import LogRequests from '#middleware/log_requests_middleware'
 import router from '@adonisjs/core/services/router'
 import server from '@adonisjs/core/services/server'
 
@@ -44,4 +45,5 @@ router.use([
  */
 export const middleware = router.named({
   auth: () => import('#middleware/auth_middleware'),
+  LogRequests: () => import('#middleware/log_requests_middleware')
 })

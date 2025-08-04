@@ -6,7 +6,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.enum('estado', ['esperando', 'iniciado', 'finalizado']).defaultTo('esperando')
+      table.enum('estado', ['esperando', 'iniciado', 'finalizado', 'revancha_pendiente']).defaultTo('esperando').notNullable()
       table.integer('anfitrion_id').unsigned().nullable()
       table.integer('ganador_id').unsigned().nullable()
       table.integer('max_jugadores').notNullable().defaultTo(16)
